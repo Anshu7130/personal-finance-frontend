@@ -10,22 +10,34 @@ import {
   ResponsiveContainer
 } from 'recharts';
 
+type Transaction = {
+  date: string;
+  amount: number;
+  category: string;
+  type: 'income' | 'expense';
+};
+
+type MonthlyData = {
+  month: string;
+  income: number;
+  expenses: number;
+};
+
 function Dashboard() {
-  const [transactions, setTransactions] = useState([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [totals, setTotals] = useState({
     income: 0,
     expenses: 0,
     balance: 0,
   });
-  const [chartData, setChartData] = useState([]);
-  
+  const [chartData, setChartData] = useState<MonthlyData[]>([]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    axios.get('http://localhost:5000/api/transactions',{
+    axios.get<Transaction[]>('http://localhost:5000/api/transactions', {
       headers: {
         Authorization: token || '',
-      },  
+      },
     })
       .then((res) => {
         setTransactions(res.data);
@@ -35,11 +47,11 @@ function Dashboard() {
       .catch((err) => console.error('Fetch error:', err));
   }, []);
 
-  const calculateTotals = (data) => {
+  const calculateTotals = (data: Transaction[]) => {
     let income = 0;
     let expenses = 0;
 
-    data.forEach((tx) => {
+    data.forEach((tx: Transaction) => {
       if (tx.type === 'income') {
         income += tx.amount;
       } else {
@@ -47,7 +59,7 @@ function Dashboard() {
       }
     });
 
-    const balance = income - expenses; // expenses are negative
+    const balance = income - expenses;
 
     setTotals({
       income,
@@ -56,10 +68,10 @@ function Dashboard() {
     });
   };
 
-  const getMonthlyData = (data) => {
-    const monthlyTotals = {};
+  const getMonthlyData = (data: Transaction[]): MonthlyData[] => {
+    const monthlyTotals: { [key: string]: { income: number; expenses: number } } = {};
 
-    data.forEach((tx) => {
+    data.forEach((tx: Transaction) => {
       const month = new Date(tx.date).toLocaleString('default', { month: 'short' });
 
       if (!monthlyTotals[month]) {
@@ -78,7 +90,7 @@ function Dashboard() {
       ...values,
     }));
   };
-  console.log('Chart Data:', chartData);
+
   return (
     <div className="container-fluid" style={{ backgroundColor: '#fbe3cc', minHeight: '100vh' }}>
       <h2 className="mb-4 mt-3">Dashboard</h2>
