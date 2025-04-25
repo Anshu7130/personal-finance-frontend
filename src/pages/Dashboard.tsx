@@ -24,12 +24,12 @@ type MonthlyData = {
 };
 
 function Dashboard() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [totals, setTotals] = useState({
     income: 0,
     expenses: 0,
     balance: 0,
   });
+
   const [chartData, setChartData] = useState<MonthlyData[]>([]);
 
   useEffect(() => {
@@ -40,7 +40,6 @@ function Dashboard() {
       },
     })
       .then((res) => {
-        setTransactions(res.data);
         calculateTotals(res.data);
         setChartData(getMonthlyData(res.data));
       })
@@ -51,7 +50,7 @@ function Dashboard() {
     let income = 0;
     let expenses = 0;
 
-    data.forEach((tx: Transaction) => {
+    data.forEach((tx) => {
       if (tx.type === 'income') {
         income += tx.amount;
       } else {
