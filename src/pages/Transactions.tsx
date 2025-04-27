@@ -11,11 +11,10 @@ type Transaction = {
   note?: string;
 };
 
-
 function Transactions() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [formData, setFormData] = useState<Transaction>({
-    userId:'',
+    userId: '',
     date: '',
     category: '',
     amount: 0,
@@ -25,38 +24,42 @@ function Transactions() {
   const [monthFilter, setMonthFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [isEditing, setIsEditing] = useState(false);
-const [editId, setEditId] = useState<string | null>(null);
-
+  const [editId, setEditId] = useState<string | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    axios.get('http://localhost:5000/api/transactions', {
+    const baseURL = import.meta.env.VITE_API_BASE_URL; 
+
+    axios.get(`${baseURL}/api/transactions`, {
       headers: { Authorization: token || '' }
     })
       .then((res) => setTransactions(res.data))
       .catch((err) => console.error('Fetch error:', err));
   }, []);
 
-  const handleChange = (e:  React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
+    const baseURL = import.meta.env.VITE_API_BASE_URL; 
+
     try {
-      if(isEditing && editId){
-      const res = await axios.put(`http://localhost:5000/api/transactions/${editId}`, formData, {
-        headers: { Authorization: token || '' }
-      });
-      setTransactions((prev) =>
-        prev.map((tx) => (tx._id === editId ? res.data: tx))
-    );
-  }else{
-    const res = await axios.post('http://localhost:5000/api/transactions', formData, {
-      headers: { Authorization: token || '' }
-    });
-    setTransactions((prev) => [res.data, ...prev]);
-  }
+      if (isEditing && editId) {
+        const res = await axios.put(`${baseURL}/api/transactions/${editId}`, formData, {
+          headers: { Authorization: token || '' }
+        });
+        setTransactions((prev) =>
+          prev.map((tx) => (tx._id === editId ? res.data : tx))
+        );
+      } else {
+        const res = await axios.post(`${baseURL}/api/transactions`, formData, {
+          headers: { Authorization: token || '' }
+        });
+        setTransactions((prev) => [res.data, ...prev]);
+      }
       setFormData({
         userId: '',
         date: '',
@@ -67,6 +70,7 @@ const [editId, setEditId] = useState<string | null>(null);
       });
       setIsEditing(false);
       setEditId(null);
+
       const closeBtn = document.querySelector('[data-bs-dismiss="modal"]') as HTMLElement;
       if (closeBtn) closeBtn.click();
     } catch (err) {
@@ -74,11 +78,13 @@ const [editId, setEditId] = useState<string | null>(null);
       alert('Failed to save transaction');
     }
   };
-  
+
   const handleDelete = async (id: string) => {
+    const token = localStorage.getItem('token');
+    const baseURL = import.meta.env.VITE_API_BASE_URL; 
+
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/transactions/${id}`, {
+      await axios.delete(`${baseURL}/api/transactions/${id}`, {
         headers: { Authorization: token || '' }
       });
       setTransactions(transactions.filter((tx) => tx._id !== id));
@@ -86,6 +92,7 @@ const [editId, setEditId] = useState<string | null>(null);
       console.error('Delete error:', err);
     }
   };
+
   const handleEdit = (tx: Transaction) => {
     setIsEditing(true);
     setEditId(tx._id || null);
@@ -98,7 +105,6 @@ const [editId, setEditId] = useState<string | null>(null);
       note: tx.note || '',
     });
   };
-  
 
   const getFilteredTransactions = () => {
     return transactions.filter((tx) => {
@@ -162,24 +168,23 @@ const [editId, setEditId] = useState<string | null>(null);
                 <td>
                   {tx._id && (
                     <>
-                     <button
-                     className="btn btn-sm btn-outline-primary me-2"
-                     data-bs-toggle="modal"
-                     data-bs-target="#addTransactionModal"
-                     onClick={() => handleEdit(tx)}
-                   >
-                     🖉
-                   </button>
-                  <button
-                   className="btn btn-sm btn-outline-danger"
-                    onClick={() => handleDelete(tx._id!)}
-                    >
-                      🗑
-                  </button>
-                  </>
+                      <button
+                        className="btn btn-sm btn-outline-primary me-2"
+                        data-bs-toggle="modal"
+                        data-bs-target="#addTransactionModal"
+                        onClick={() => handleEdit(tx)}
+                      >
+                        🖉
+                      </button>
+                      <button
+                        className="btn btn-sm btn-outline-danger"
+                        onClick={() => handleDelete(tx._id!)}
+                      >
+                        🗑
+                      </button>
+                    </>
                   )}
-                  
-                </td> 
+                </td>
               </tr>
             ))}
           </tbody>

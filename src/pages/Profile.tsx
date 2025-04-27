@@ -29,15 +29,18 @@ function Profile() {
   };
 
   const handleUpdate = async () => {
+    const token = localStorage.getItem('token');
+    const baseURL = import.meta.env.VITE_API_BASE_URL; 
+
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.put('http://localhost:5000/api/auth/profile', user, {
+      const res = await axios.put(`${baseURL}/api/auth/profile`, user, { 
         headers: { Authorization: token || '' },
       });
       localStorage.setItem('user', JSON.stringify(res.data.user));
       setEditMode(false);
       alert('Profile updated successfully');
     } catch (err) {
+      console.error('Update failed:', err);
       alert('Update failed');
     }
   };
@@ -101,12 +104,9 @@ function Profile() {
         </button>
 
         <hr />
-        {/* <p className="text-muted text-center mt-3" style={{ fontSize: '0.9rem' }}>
-          You can update your details anytime.
-        </p> */}
       </div>
 
-      {/* Toast */}
+    
       <div
         className="toast position-fixed bottom-0 end-0 m-4 text-white bg-dark"
         role="alert"

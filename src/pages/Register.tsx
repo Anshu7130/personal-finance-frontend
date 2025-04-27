@@ -12,8 +12,9 @@ function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const baseURL = import.meta.env.VITE_API_BASE_URL;
     try {
-      await axios.post('http://localhost:5000/api/auth/register', formData);
+      await axios.post(`${baseURL}/api/auth/register`, formData);
       alert('Registration successful! You can now log in.');
       navigate('/');
     } catch (err) {

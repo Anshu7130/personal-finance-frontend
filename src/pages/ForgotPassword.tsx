@@ -7,11 +7,14 @@ function ForgotPassword() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const baseURL = import.meta.env.VITE_API_BASE_URL; // ✅ added
+
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
+      const res = await axios.post(`${baseURL}/api/auth/forgot-password`, { email }); // ✅ dynamic URL
       localStorage.setItem('resetUserId', res.data.userId);
       setStatus('User found. You can now reset your password.');
     } catch (err: any) {
+      console.error('Forgot password error:', err);
       setStatus('No account found with this email.');
     }
   };
