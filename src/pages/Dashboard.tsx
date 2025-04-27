@@ -34,11 +34,13 @@ function Dashboard() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    axios.get<Transaction[]>('http://localhost:5000/api/transactions', {
+    const baseURL = import.meta.env.VITE_API_BASE_URL;
+    axios.get(`${baseURL}/api/transactions`, {
       headers: {
         Authorization: token || '',
       },
     })
+    
       .then((res) => {
         calculateTotals(res.data);
         setChartData(getMonthlyData(res.data));
